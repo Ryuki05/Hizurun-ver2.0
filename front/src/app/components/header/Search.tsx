@@ -26,7 +26,7 @@ const Search = () => {
     const [search, setSearch] = useState<string>('');
     const [category, setCategory] = useState<string>('');
     const [sort, setSort] = useState<string>('');
-    // const [isLoggedIn, setIsLoggedIn] = useState(false);
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -41,9 +41,6 @@ const Search = () => {
                 console.error('エラー:', error);
             }
         };
-
-        // const token = localStorage.getItem('token');
-        // setIsLoggedIn(!!token); // トークンがあればログイン状態をtrueに
 
         fetchData();
     }, []);
@@ -69,13 +66,7 @@ const Search = () => {
         <div>
             <form onSubmit={handleSearch}>
                 <div>
-                    <input
-                        type="text"
-                        name="search"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="商品を検索"
-                    />
+
                     <select
                         name="category"
                         value={category}
@@ -98,6 +89,14 @@ const Search = () => {
                         <option value="price_desc">価格: 高い順</option>
                         <option value="newest">新着順</option>
                     </select>
+                    <input
+                        type="text"
+                        name="search"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="商品を検索"
+                        className="p-2 border rounded w-full"
+                    />
                     <button type="submit">検索</button>
                 </div>
             </form>

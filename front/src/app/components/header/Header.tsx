@@ -58,22 +58,6 @@ const Header = () => {
         fetchData();
     }, []);
 
-    // const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
-    //     event.preventDefault();
-
-    //     const params = new URLSearchParams();
-    //     if (search) params.append('search', search);
-    //     if (category) params.append('category', category);
-    //     if (sort) params.append('sort', sort);
-
-    //     const response = await fetch(`http://localhost:8000/api/products?${params.toString()}`);
-    //     if (response.ok) {
-    //         const result: ProductListData = await response.json();
-    //         setData(result);
-    //     } else {
-    //         console.error('検索に失敗しました');
-    //     }
-    // };
 
     if (!data) {
         return <div>読み込み中...</div>;
