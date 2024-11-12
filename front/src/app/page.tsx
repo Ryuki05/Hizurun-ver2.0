@@ -4,6 +4,7 @@ import "./globals.css";
 import OpeningShutter from './components/home/OpeningShutter';
 import Popularproducts from './components/home/Popular-products';
 import Featuredproducts from './components/home/Featured-products';
+import Categories from './components/Categories';
 // import Categories from './components/Categories';
 const HomePage = () => {
 
@@ -12,7 +13,7 @@ const HomePage = () => {
             <OpeningShutter />
             <Header />
             <Popularproducts/>
-            {/* <Categories/> */}
+            <Categories/>
             <Featuredproducts/>
             <Footer />
         </div>

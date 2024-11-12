@@ -60,3 +60,15 @@
     transform: scale(0.98); /* ボタンを少し縮小 */
     opacity: 1;
 }
+
+.hizurun-border {
+    padding: 2px; /* ボーダー幅に相当する部分 */
+    border-radius: 20px; /* 角を少し丸める */
+    background: linear-gradient(45deg, #ffb4c1, #ffb1bf, #fbc2c9, #ffd1d9);
+}
+
+.hizurun-border-inner {
+    border-radius: 20px; /* 内側の角を少し小さめに */
+    background-color: #ffffff; /* 内側の背景色 */
+    padding: 20px; /* ボーダーと内容の間の余白 */
+}

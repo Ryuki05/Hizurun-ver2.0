@@ -10,6 +10,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AdminController;
 
+use App\Http\Controllers\Auth\RegisterController;
+
 // 誰でもアクセスできるAPIルート
 Route::get('/home', [HomeController::class, 'index'])->name('api.home');
 
@@ -25,6 +27,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('/user/account', [UserController::class, 'update'])->name('api.user.update');
     Route::get('/user/wishlist', [UserController::class, 'wishlist'])->name('api.user.wishlist');
     Route::post('/user/wishlist', [UserController::class, 'addToWishlist'])->name('api.user.wishlist.add');
+
+
+    Route::post('/register', [RegisterController::class, 'register']);
 
     // レビュー関連
     Route::post('/products/{product}/reviews', [ReviewController::class, 'store'])->name('api.reviews.store');

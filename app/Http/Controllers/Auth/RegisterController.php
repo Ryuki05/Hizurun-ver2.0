@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
@@ -68,5 +70,42 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+    }
+
+    /**
+     * 新規ユーザー登録処理
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function register(Request $request)
+    {
+        Log::info('Register request received', ['request' => $request->all()]);
+
+        // バリデーションルールを適用
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'password' => 'required|string|min:8|confirmed', // パスワード確認
+        ]);
+
+        // バリデーションが失敗した場合
+        if ($validator->fails()) {
+            Log::error('Validation failed', ['errors' => $validator->errors()]);
+            return response()->json(['message' => '無効な入力です', 'errors' => $validator->errors()], 400);
+        }
+
+        try {
+            // 新しいユーザーを作成
+            $user = User::create([
+                'name' => $request->name,
+                'password' => Hash::make($request->password), // パスワードをハッシュ化
+            ]);
+            Log::info('User created successfully', ['user' => $user]);
+
+            return response()->json(['message' => 'ユーザー登録が成功しました', 'user' => $user], 201);
+        } catch (\Exception $e) {
+            Log::error('Error creating user', ['exception' => $e->getMessage()]);
+            return response()->json(['message' => '登録に失敗しました'], 500);
+        }
     }
 }

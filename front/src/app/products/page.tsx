@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image'; // Imageコンポーネントをインポート
 
 interface Category {
@@ -23,15 +24,23 @@ interface ProductListData {
 }
 
 const ProductListPage = () => {
+    const searchParams = useSearchParams();
     const [data, setData] = useState<ProductListData | null>(null);
-    const [search, setSearch] = useState<string>('');
-    const [category, setCategory] = useState<string>('');
-    const [sort, setSort] = useState<string>('');
+
+    // クエリパラメータを取得
+    const search = searchParams.get('search') || '';
+    const category = searchParams.get('category') || '';
+    const sort = searchParams.get('sort') || '';
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/products');
+                const params = new URLSearchParams();
+                if (search) params.append('search', search);
+                if (category) params.append('category', category);
+                if (sort) params.append('sort', sort);
+
+                const response = await fetch(`http://localhost:8000/api/products?${params.toString()}`);
                 if (!response.ok) {
                     throw new Error('データの取得に失敗しました');
                 }
@@ -43,24 +52,7 @@ const ProductListPage = () => {
         };
 
         fetchData();
-    }, []);
-
-    const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-        const params = new URLSearchParams();
-        if (search) params.append('search', search);
-        if (category) params.append('category', category);
-        if (sort) params.append('sort', sort);
-
-        const response = await fetch(`http://localhost:8000/api/products?${params.toString()}`);
-        if (response.ok) {
-            const result: ProductListData = await response.json();
-            setData(result);
-        } else {
-            console.error('検索に失敗しました');
-        }
-    };
+    }, [search, category, sort]);
 
     if (!data) {
         return <div>読み込み中...</div>;
@@ -69,42 +61,6 @@ const ProductListPage = () => {
     return (
         <div>
             <h1>商品一覧</h1>
-
-            <form  onSubmit={handleSearch}>
-                <div>
-                    <input
-                        type="text"
-                        name="search"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="商品を検索"
-                    />
-                    <select
-                        name="category"
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                    >
-                        <option value="">全カテゴリー</option>
-                        {data.categories.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                                {cat.name}
-                            </option>
-                        ))}
-                    </select>
-                    <select
-                        name="sort"
-                        value={sort}
-                        onChange={(e) => setSort(e.target.value)}
-                    >
-                        <option value="">並び替え</option>
-                        <option value="price_asc">価格: 安い順</option>
-                        <option value="price_desc">価格: 高い順</option>
-                        <option value="newest">新着順</option>
-                    </select>
-                    <button type="submit">検索</button>
-                </div>
-            </form>
-
             <div>
                 {data.products.length > 0 ? (
                     data.products.map((product) => (
@@ -113,9 +69,9 @@ const ProductListPage = () => {
                                 <Image
                                     src={product.image_path}
                                     alt={product.name}
-                                    width={200} // 適切な幅を設定
-                                    height={200} // 適切な高さを設定
-                                    layout="responsive" // レスポンシブ設定
+                                    width={200}
+                                    height={200}
+                                    layout="responsive"
                                 />
                                 <div>
                                     <h3>{product.name}</h3>
@@ -130,25 +86,6 @@ const ProductListPage = () => {
                         <p>商品が見つかりませんでした。</p>
                     </div>
                 )}
-            </div>
-
-            <div>
-                <div>
-                    {Array.from({ length: data.last_page }, (_, index) => (
-                        <button
-                            key={index}
-                            onClick={async () => {
-                                const response = await fetch(`/api/products?page=${index + 1}`);
-                                if (response.ok) {
-                                    const result: ProductListData = await response.json();
-                                    setData(result);
-                                }
-                            }}
-                        >
-                            {index + 1}
-                        </button>
-                    ))}
-                </div>
             </div>
         </div>
     );

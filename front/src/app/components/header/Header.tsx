@@ -2,8 +2,11 @@
 import React, { useEffect, useState } from 'react'
 import { Irish_Grover } from 'next/font/google';
 import CustomLink from '../custom-link';
-import Dashboard from '../Dashboard';
-import Search from './Search';
+// import Dashboard from '../Dashboard';
+// import Search from './Search';
+import Link from 'next/link';
+import SearchContainer from './search/SearchContainer';
+// import Hamburger from './Hamburger';
 
 const irishGrover = Irish_Grover({
     subsets: ['latin'],
@@ -68,19 +71,23 @@ const Header = () => {
             <CustomLink className='no-underline' href='/'>
                 <h1 className={`text-6xl text-hizurun-gr ${irishGrover.className}`}>Hizurun</h1>
             </CustomLink>
-
-            <Search/>
-
+            <SearchContainer/>
+            <ul className='flex'>
+                <li className='bg-white rounded-lg p-1 mr-3'><Link className='text-hizurun-gr' href={`../../sign-up`}>SignUp</Link></li>
+                <li className='bg-hizurun-gr rounded-lg p-1'><Link className='text-white ' href={`../../login`}>Login</Link></li>
+            </ul>
             {/* ログインしている場合はダッシュボードを表示 */}
-            {isLoggedIn ? (
+            {/* {isLoggedIn ? (
                 <Dashboard />
             ) : (
                 <div className='flex items-center'>
                     <CustomLink href="../../login" className='no-underline text-lg text-hizurun-gr'>
                         Login
                     </CustomLink>
+
                 </div>
-            )}
+
+            )} */}
         </div>
     )
 }
