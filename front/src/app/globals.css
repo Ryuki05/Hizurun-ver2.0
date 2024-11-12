@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* src/app/globals.css またはプロジェクトのメインCSSファイルに追加 */
+.text-hizurun-gr {
+    background: linear-gradient(to bottom, #ffb4c1, #ffb1bf, #fbc2c9, #ffd1d9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+/* src/app/globals.css またはメインのCSSファイルに追加 */
+.bg-hizurun-gr {
+    background: linear-gradient(to bottom, #ffb4c1, #ffb1bf, #fbc2c9, #ffd1d9);
+}
+
+.border-btm-hizurun-gr {
+    position: relative;
+    padding-bottom: 2px;
+}
+
+.border-btm-hizurun-gr::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px; /* ボーダーの高さを指定 */
+    background: linear-gradient(
+        to bottom,
+        #ffb4c1,
+        #ffb1bf,
+        #fbc2c9,
+        #ffd1d9
+    ); /* グラデーションの設定 */
+    border-radius: 2px; /* 任意で角を丸くする */
+}
+
+/* src/app/globals.css またはプロジェクトのメインCSSファイルに追加 */
+.btn-hizurun-gr {
+    background: linear-gradient(to bottom, #ffb4c1, #ffb1bf, #fbc2c9, #ffd1d9);
+    color: white; /* テキスト色を設定 */
+    padding: 0.5rem 1rem; /* ボタンの内側余白 */
+    border: none;
+    border-radius: 8px; /* ボタンの角を丸くする */
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s; /* ホバーエフェクト用のトランジション */
+}
+
+/* ホバー時のエフェクト */
+.btn-hizurun-gr:hover {
+    transform: scale(1.05); /* ボタンを少し拡大 */
+    opacity: 0.9; /* わずかに透明に */
+}
+
+/* アクティブ状態のエフェクト */
+.btn-hizurun-gr:active {
+    transform: scale(0.98); /* ボタンを少し縮小 */
+    opacity: 1;
+}
