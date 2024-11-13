@@ -145,6 +145,9 @@ const Buy = () => {
               max={product.stock}
             />
             <div className='flex-col m-2'>
+              <button className={`btn2-hizurun-gr w-96 ${mplus1p.className}`} onClick={handlePurchase}>カートに追加</button>
+            </div>
+            <div className='flex-col m-2'>
               <button className={`btn-hizurun-gr w-96 ${mplus1p.className}`} onClick={handlePurchase}>購入</button>
             </div>
           </div>

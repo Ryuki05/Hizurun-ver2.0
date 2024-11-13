@@ -3,6 +3,8 @@ import { Irish_Grover, M_PLUS_1p } from 'next/font/google';
 import React, { useEffect, useState } from 'react'
 import { HomeData, Product } from '../../types/homeTypes';
 import Image from 'next/image';
+import SlidebtnRight from './SlidebtnRight';
+import SlidebtnLeft from './SlidebtnLeft';
 
 const irishGrover = Irish_Grover({
     subsets: ['latin'],
@@ -24,7 +26,7 @@ const Popularproducts = () => {
         recommendedProducts: [],
     });
 
-
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -34,21 +36,13 @@ const Popularproducts = () => {
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
-
+                setLoading(false);
             }
         };
 
         fetchData();
     }, []);
-
-    const scroll = (direction: number, className: string) => {
-        const container = document.querySelector(`.${className}`);
-        if (container) {
-            const scrollAmount = direction * 250; // スクロール量を調整
-            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-        }
-    };
-
+    if (loading) return <div>Loading...</div>;
 
     return (
     <div>
@@ -56,12 +50,7 @@ const Popularproducts = () => {
         <section className="mb-8 px-4">
                 <h2 className={`text-2xl font-bold mb-4 ${mplus1p.className}`}>人気商品</h2>
                 <div className={`flex  space-x-4 relative`}>
-                    <button
-                        className="flex  left-0 z-10 bg-white rounded-full p-2 shadow hover:bg-gray-200"
-                        onClick={() => scroll(-1, 'popular-products')}
-                    >
-                        &lt;
-                    </button>
+                    <SlidebtnLeft/>
                     <div className={`flex overflow-hidden space-x-4 popular-products`}>
                         {data.popularProducts.length > 0 ? (
                             data.popularProducts.map((product: Product) => (
@@ -87,12 +76,7 @@ const Popularproducts = () => {
                             <p className={`text-2xl font-bold mb-4 ${mplus1p.className}`}>現在、人気商品はありません。</p>
                         )}
                     </div>
-                    <button
-                        className="absolute right-0 z-10 bg-white rounded-full p-2 shadow hover:bg-gray-200"
-                        onClick={() => scroll(1, 'popular-products')}
-                    >
-                        &gt;
-                    </button>
+                    <SlidebtnRight/>
                 </div>
             </section>
     </div>

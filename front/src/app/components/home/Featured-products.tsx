@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react'
 import { HomeData, Product } from '../../types/homeTypes';
 import Image from 'next/image';
 import "../../globals.css";
+import SlidebtnLeft from './SlidebtnLeft';
+import SlidebtnRight from './SlidebtnRight';
 
 const irishGrover = Irish_Grover({
     subsets: ['latin'],
@@ -41,28 +43,16 @@ const Featuredproducts = () => {
         fetchData();
     }, []);
 
-    const scroll = (direction: number, className: string) => {
-        const container = document.querySelector(`.${className}`);
-        if (container) {
-            const scrollAmount = direction * 250; // スクロール量を調整
-            container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-        }
-    };
 
     if (loading) return <div>Loading...</div>;
 
   return (
     <div>
-                {/* おすすめ商品セクション */}
-                <section className="mb-8 px-4 pb-80">
+        {/* おすすめ商品セクション */}
+        <section className="mb-8 px-4 pb-80">
             <h2 className={`text-2xl font-bold mb-4 ${mplus1p.className}`}>おすすめ商品</h2>
             <div className={`flex  space-x-4 relative`}>
-                <button
-                    className="absolute left-0 z-10 bg-white rounded-full p-2 shadow hover:bg-gray-200"
-                    onClick={() => scroll(-1, 'recommended-products')}
-                >
-                    &lt;
-                </button>
+                <SlidebtnLeft/>
                 <div className={`flex overflow-hidden space-x-4 recommended-products`}>
                     {data.recommendedProducts.length > 0 ? (
                         data.recommendedProducts.map((product: Product) => (
@@ -77,7 +67,7 @@ const Featuredproducts = () => {
                                 />
                                 <div className="mt-2 text-center">
                                     <h3 className={`text-lg font-semibold ${mplus1p.className}`}>{product.name}</h3>
-                                    <p className={`text-gray-600 ${irishGrover.className}`}>
+                                    <p className={` ${irishGrover.className}`}>
                                         <span className={`${mplus1p.className}`}>価格:</span> ¥{new Intl.NumberFormat().format(product.price)}
                                     </p>
                                     <a href={`/products/${product.id}`} className={`text-hizurun-gr ${mplus1p.className}`}>詳細を見る</a>
@@ -88,12 +78,7 @@ const Featuredproducts = () => {
                         <p className={`text-2xl font-bold mb-4 ${mplus1p.className}`}>現在、おすすめ商品はありません。</p>
                     )}
                 </div>
-                <button
-                    className="absolute right-0 z-10 bg-white rounded-full p-2 shadow hover:bg-gray-200"
-                    onClick={() => scroll(1, 'recommended-products')}
-                >
-                    &gt;
-                </button>
+                <SlidebtnRight/>
             </div>
         </section>
     </div>

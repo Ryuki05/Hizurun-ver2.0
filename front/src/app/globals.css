@@ -37,7 +37,6 @@
     border-radius: 2px; /* 任意で角を丸くする */
 }
 
-/* src/app/globals.css またはプロジェクトのメインCSSファイルに追加 */
 .btn-hizurun-gr {
     background: linear-gradient(to bottom, #ffb4c1, #ffb1bf, #fbc2c9, #ffd1d9);
     color: white; /* テキスト色を設定 */
@@ -55,8 +54,34 @@
     opacity: 0.9; /* わずかに透明に */
 }
 
-/* アクティブ状態のエフェクト */
 .btn-hizurun-gr:active {
+    transform: scale(0.98); /* ボタンを少し縮小 */
+    opacity: 1;
+}
+
+.btn2-hizurun-gr {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+
+    /* テキストグラデーションの設定 */
+    background: linear-gradient(to bottom, #ffb4c1, #ffb1bf, #fbc2c9, #ffd1d9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    /* color: transparent; */
+}
+
+.btn2-hizurun-gr:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+/* アクティブ状態のエフェクト */
+.btn2-hizurun-gr:active {
     transform: scale(0.98); /* ボタンを少し縮小 */
     opacity: 1;
 }
