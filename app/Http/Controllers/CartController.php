@@ -4,24 +4,19 @@ namespace App\Http\Controllers;
 use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
     /**
      * カート内容の表示 (API)
      */
-    public function apiIndex()
+    public function apiIndex(Request $request)
     {
-        $cartItems = auth()->user()->cartItems()->with('product')->get();
-        $total = $cartItems->sum(function($item) {
-            return $item->quantity * $item->product->price;
-        });
+        // ユーザーが認証されていない場合でもカートの内容を取得
+        $cartItems = session()->get('cart', []);
+        $total = array_reduce($cartItems, function($sum, $item) {
+            return $sum + $item['quantity'] * $item['price'];
+        }, 0);
 
         return response()->json([
             'cartItems' => $cartItems,
@@ -29,6 +24,37 @@ class CartController extends Controller
         ]);
     }
 
+    /**
+     * カートに商品を追加する (API)
+     */
+    public function apiAddToCart(Request $request)
+    {
+        $validatedData = $request->validate([
+            'product_id' => 'required|integer|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        // カートに商品を追加（セッションに格納）
+        $cart = session()->get('cart', []);
+        $product = Product::find($validatedData['product_id']);
+
+        // 商品がすでにカートに存在する場合は数量を更新
+        if (isset($cart[$product->id])) {
+            $cart[$product->id]['quantity'] += $validatedData['quantity'];
+        } else {
+            $cart[$product->id] = [
+                'name' => $product->name,
+                'price' => $product->price,
+                'quantity' => $validatedData['quantity'],
+                'image' => $product->image_path,
+            ];
+        }
+
+        // セッションにカートを保存
+        session()->put('cart', $cart);
+
+        return response()->json(['message' => 'カートに商品が追加されました。']);
+    }
 
     /**
      * カートの更新 (API)
@@ -40,10 +66,16 @@ class CartController extends Controller
             'quantities.*' => 'required|integer|min:1',
         ]);
 
-        foreach ($validatedData['quantities'] as $cartItemId => $quantity) {
-            $cartItem = auth()->user()->CartItems()->findOrFail($cartItemId);
-            $cartItem->update(['quantity' => $quantity]);
+        $cart = session()->get('cart', []);
+
+        foreach ($validatedData['quantities'] as $productId => $quantity) {
+            if (isset($cart[$productId])) {
+                $cart[$productId]['quantity'] = $quantity;
+            }
         }
+
+        // セッションにカートを更新して保存
+        session()->put('cart', $cart);
 
         return response()->json(['message' => 'カートが更新されました。']);
     }
@@ -51,9 +83,21 @@ class CartController extends Controller
     /**
      * カートから商品を削除する (API)
      */
-    public function apiDestroy(CartItem $cartItem)
+    public function apiDestroy(Request $request)
     {
-        $cartItem->delete();
+        $validatedData = $request->validate([
+            'product_id' => 'required|integer',
+        ]);
+
+        $cart = session()->get('cart', []);
+
+        // 指定された商品をカートから削除
+        if (isset($cart[$validatedData['product_id']])) {
+            unset($cart[$validatedData['product_id']]);
+        }
+
+        // セッションにカートを保存
+        session()->put('cart', $cart);
 
         return response()->json(['message' => '商品がカートから削除されました。']);
     }

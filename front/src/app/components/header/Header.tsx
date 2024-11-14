@@ -7,6 +7,7 @@ import CustomLink from '../custom-link';
 import Link from 'next/link';
 import SearchContainer from './search/SearchContainer';
 // import Hamburger from './Hamburger';
+import Image from 'next/image';
 
 const irishGrover = Irish_Grover({
     subsets: ['latin'],
@@ -68,11 +69,23 @@ const Header = () => {
 
     return (
         <div className='border-b-2 border-btm-hizurun-gr flex justify-between items-center p-4'>
-            <CustomLink className='no-underline' href='/'>
+            <CustomLink className="no-underline flex items-center space-x-4" href="/">
+                <Image
+                    src="/image/Hizurun-ico.png"
+                    alt="Hizurun Icon"
+                    width={100}
+                    height={100}
+                    style={{ objectFit: "cover" }}
+                    className="rounded"
+                />
                 <h1 className={`text-6xl text-hizurun-gr ${irishGrover.className}`}>Hizurun</h1>
             </CustomLink>
+
             <SearchContainer/>
             <ul className='flex'>
+                <li className='bg-white rounded-lg p-1 mr-3'><Link className='text-hizurun-gr' href={`../../user/account`}>アカウント情報</Link></li>
+                <li className='bg-white rounded-lg p-1 mr-3'><Link className='text-hizurun-gr' href={`#`}>注文履歴</Link></li>
+                <li className='bg-white rounded-lg p-1 mr-3'><Link className='text-hizurun-gr' href={`../../cart`}>カート</Link></li>
                 <li className='bg-white rounded-lg p-1 mr-3'><Link className='text-hizurun-gr' href={`../../sign-up`}>SignUp</Link></li>
                 <li className='bg-hizurun-gr rounded-lg p-1'><Link className='text-white ' href={`../../login`}>Login</Link></li>
             </ul>

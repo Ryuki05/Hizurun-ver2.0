@@ -19,8 +19,9 @@ Route::get('/home', [HomeController::class, 'index'])->name('api.home');
 Route::middleware(['auth:sanctum'])->group(function () {
     // カート関連
     Route::get('/cart', [CartController::class, 'apiIndex']);
-    Route::patch('/cart/update', [CartController::class, 'apiUpdate']);
-    Route::delete('/cart/{cartItem}', [CartController::class, 'apiDestroy']);
+    Route::post('/cart', [CartController::class, 'apiAddToCart']);
+    Route::post('/cart/update', [CartController::class, 'apiUpdate']);
+    Route::delete('/cart', [CartController::class, 'apiDestroy']);
 
     // ユーザーアカウント関連
     Route::get('/user/account', [UserController::class, 'show'])->name('api.user.account');

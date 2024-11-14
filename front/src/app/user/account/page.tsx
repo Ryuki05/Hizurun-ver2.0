@@ -1,16 +1,39 @@
+'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation'; // app router用のnext/navigationをインポート
+import Image from 'next/image';
+
+// ユーザー情報の型を定義
+interface User {
+    name: string;
+    email: string;
+}
+
+// 注文情報の型を定義
+interface Order {
+    id: number;
+    total_amount: number;
+    status: string;
+}
+
+// ウィッシュリスト商品の型を定義
+interface WishlistItem {
+    id: number;
+    name: string;
+    price: number;
+    image_path: string;
+}
 
 const AccountPage = () => {
-    const [user, setUser] = useState<any>(null);
-    const [orders, setOrders] = useState<any[]>([]);
-    const [wishlist, setWishlist] = useState<any[]>([]);
+    const [user, setUser] = useState<User | null>(null);
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
     const router = useRouter();
 
     useEffect(() => {
         // ユーザー情報を取得
         const fetchUserData = async () => {
-            const response = await fetch('/api/user'); // UserControllerのAPIエンドポイントを指定
+            const response = await fetch('/api/user');
             const data = await response.json();
             setUser(data.user);
             setOrders(data.orders);
@@ -29,100 +52,94 @@ const AccountPage = () => {
         });
 
         if (response.ok) {
-            // 更新成功時の処理
-            router.reload(); // ページをリロードして最新の情報を取得
+            router.refresh(); // router.reload() の代わりに router.refresh() を使用
         } else {
-            // エラーハンドリング
             console.error('更新エラーが発生しました。');
         }
     };
 
     return (
-        <div>
-            <h1>アカウント情報</h1>
+        <div className="bg-white text-gray-900">
+            <div className="max-w-4xl mx-auto px-6 py-8">
+                {/* ヘッダー部分 */}
+                <h1 className="text-4xl font-serif text-hizurun-gr mb-8">アカウント情報</h1>
 
-            <div>
-                <section>
-                    <div>
-                        <h2>個人情報</h2>
-                    </div>
-                    <div>
-                        {user && (
-                            <form onSubmit={handleUpdate}>
-                                <div>
-                                    <label htmlFor="name">名前</label>
-                                    <input
-                                        type="text"
-                                        id="name"
-                                        name="name"
-                                        defaultValue={user.name}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="email">メールアドレス</label>
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        name="email"
-                                        defaultValue={user.email}
-                                        required
-                                    />
-                                </div>
-                                <button type="submit">更新</button>
-                            </form>
-                        )}
-                    </div>
+                {/* プロフィールセクション */}
+                <section className="bg-white shadow-lg rounded-lg p-6 mb-8 border-btm-hizurun-gr">
+                    <h2 className="text-2xl font-semibold text-gray-700 mb-4">個人情報</h2>
+                    {user && (
+                        <form onSubmit={handleUpdate} className="space-y-4">
+                            <div>
+                                <label htmlFor="name" className="text-sm text-gray-600">名前</label>
+                                <input
+                                    type="text"
+                                    id="name"
+                                    name="name"
+                                    defaultValue={user.name}
+                                    required
+                                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="email" className="text-sm text-gray-600">メールアドレス</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    defaultValue={user.email}
+                                    required
+                                    className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            <button type="submit" className="btn-hizurun-gr mt-4">更新</button>
+                        </form>
+                    )}
                 </section>
-            </div>
 
-            <div>
-                <section>
-                    <div>
-                        <h2>注文履歴</h2>
-                    </div>
-                    <div>
-                        {orders.length > 0 ? (
-                            orders.map(order => (
-                                <div key={order.id}>
-                                    <h5>注文番号: {order.id}</h5>
-                                    <p>合計: ¥{new Intl.NumberFormat().format(order.total_amount)}</p>
-                                    <p>状態: {order.status}</p>
-                                    <a href={`/orders/${order.id}`}>詳細を見る</a>
-                                </div>
-                            ))
-                        ) : (
-                            <p>注文履歴がありません。</p>
-                        )}
-                    </div>
+                {/* 注文履歴セクション */}
+                <section className="bg-white shadow-lg rounded-lg p-6 mb-8 border-btm-hizurun-gr">
+                    <h2 className="text-2xl font-semibold text-gray-700 mb-4">注文履歴</h2>
+                    {orders.length > 0 ? (
+                        orders.map(order => (
+                            <div key={order.id} className="border-b border-gray-200 py-4">
+                                <h5 className="text-xl text-gray-800">注文番号: {order.id}</h5>
+                                <p className="text-gray-600">合計: ¥{new Intl.NumberFormat().format(order.total_amount)}</p>
+                                <p className="text-gray-600">状態: {order.status}</p>
+                                <a href={`/orders/${order.id}`} className="text-pink-500 hover:text-pink-600">詳細を見る</a>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-500">注文履歴がありません。</p>
+                    )}
                 </section>
-            </div>
 
-            <section>
-                <div>
-                    <h2>ウィッシュリスト</h2>
-                </div>
-                <div>
+                {/* ウィッシュリストセクション */}
+                <section className="bg-white shadow-lg rounded-lg p-6 border-btm-hizurun-gr">
+                    <h2 className="text-2xl font-semibold text-gray-700 mb-4">ウィッシュリスト</h2>
                     {wishlist.length > 0 ? (
                         wishlist.map(product => (
-                            <div key={product.id}>
-                                <div>
-                                    <img src={product.image_path} alt={product.name} />
-                                    <div>
-                                        <h5>{product.name}</h5>
-                                        <p>価格: ¥{new Intl.NumberFormat().format(product.price)}</p>
-                                        <a href={`/products/${product.id}`}>詳細を見る</a>
-                                    </div>
+                            <div key={product.id} className="flex items-center border-b border-gray-200 py-4">
+                                <Image
+                                    src={product.image_path}
+                                    alt={product.name}
+                                    width={100}
+                                    height={100}
+                                    className="rounded-md mr-4"
+                                />
+                                <div className="flex-grow">
+                                    <h5 className="text-xl text-gray-800">{product.name}</h5>
+                                    <p className="text-gray-600">価格: ¥{new Intl.NumberFormat().format(product.price)}</p>
+                                    <a href={`/products/${product.id}`} className="text-pink-500 hover:text-pink-600">詳細を見る</a>
                                 </div>
                             </div>
                         ))
                     ) : (
                         <div>
-                            <p>ウィッシュリストは空です。</p>
+                            <p className="text-gray-500">ウィッシュリストは空です。</p>
                         </div>
                     )}
-                </div>
-            </section>
+                </section>
+            </div>
         </div>
     );
 };
