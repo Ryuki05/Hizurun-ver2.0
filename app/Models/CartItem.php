@@ -12,9 +12,9 @@ class CartItem extends Model
     use HasFactory, Notifiable;
 
     protected $fillable = [
-        'user_id',
         'product_id',
-        'quantity'
+        'quantity',
+        'user_id',
     ];
 
     /**

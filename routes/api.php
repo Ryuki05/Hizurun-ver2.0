@@ -45,8 +45,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 // Order
 Route::get('/orders', [OrderController::class, 'index']);
-Route::post('/orders', [OrderController::class, 'store']);
 Route::get('/orders/create', [OrderController::class, 'create']);
+Route::post('/orders', [OrderController::class, 'store']);
 
 // product
 Route::get('/products', [ProductController::class, 'index']);
