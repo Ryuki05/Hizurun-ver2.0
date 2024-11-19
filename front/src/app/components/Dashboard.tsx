@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 // ユーザーデータの型を定義
 type UserData = {
@@ -9,10 +10,12 @@ type UserData = {
 export default function Dashboard() {
   const [userData, setUserData] = useState<UserData | null>(null); // 型を指定
   const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession(); // next-authのセッションを取得
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem('token');
+      // tokenがない場合の処理
+      const token = session?.user?.token as string; // 型アサーションでstringとして扱う
 
       if (!token) {
         setError('No token found. Please log in.');
@@ -22,7 +25,7 @@ export default function Dashboard() {
       try {
         const response = await fetch('http://localhost:8000/api/user', {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // tokenを使ってAPIリクエスト
           },
         });
 
@@ -42,7 +45,7 @@ export default function Dashboard() {
     };
 
     fetchUserData();
-  }, []);
+  }, [session]); // sessionが変更されるたびに再実行
 
   return (
     <div>

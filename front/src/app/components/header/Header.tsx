@@ -1,13 +1,11 @@
 'use client';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 import { Irish_Grover } from 'next/font/google';
 import CustomLink from '../custom-link';
-// import Dashboard from '../Dashboard';
-// import Search from './Search';
 import Link from 'next/link';
 import SearchContainer from './search/SearchContainer';
-// import Hamburger from './Hamburger';
 import Image from 'next/image';
+import { signOut } from 'next-auth/react';  // signOutをインポート
 
 const irishGrover = Irish_Grover({
     subsets: ['latin'],
@@ -34,13 +32,8 @@ interface ProductListData {
     total: number;
 }
 
-
 const Header = () => {
-
     const [data, setData] = useState<ProductListData | null>(null);
-    // const [search, setSearch] = useState<string>('');
-    // const [category, setCategory] = useState<string>('');
-    // const [sort, setSort] = useState<string>('');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
@@ -62,6 +55,12 @@ const Header = () => {
         fetchData();
     }, []);
 
+    const handleLogout = () => {
+        // localStorageからトークンを削除して、isLoggedInをfalseに
+        localStorage.removeItem('token');
+        setIsLoggedIn(false);
+        signOut({ redirect: false }); // next-authのsignOutを実行
+    };
 
     if (!data) {
         return <div>読み込み中...</div>;
@@ -81,28 +80,34 @@ const Header = () => {
                 <h1 className={`text-6xl text-hizurun-gr ${irishGrover.className}`}>Hizurun</h1>
             </CustomLink>
 
-            <SearchContainer/>
+            <SearchContainer />
             <ul className='flex'>
-                <li className='bg-white rounded-lg p-1 mr-3'><Link className='text-hizurun-gr' href={`../../user/account`}>アカウント情報</Link></li>
-                <li className='bg-white rounded-lg p-1 mr-3'><Link className='text-hizurun-gr' href={`#`}>注文履歴</Link></li>
-                <li className='bg-white rounded-lg p-1 mr-3'><Link className='text-hizurun-gr' href={`../../cart`}>カート</Link></li>
-                <li className='bg-white rounded-lg p-1 mr-3'><Link className='text-hizurun-gr' href={`../../sign-up`}>SignUp</Link></li>
-                <li className='bg-hizurun-gr rounded-lg p-1'><Link className='text-white ' href={`../../login`}>Login</Link></li>
+                <li className='bg-white rounded-lg p-1 mr-3'>
+                    <Link className='text-hizurun-gr' href={`../../user/account`}>アカウント情報</Link>
+                </li>
+                <li className='bg-white rounded-lg p-1 mr-3'>
+                    <Link className='text-hizurun-gr' href={`#`}>注文履歴</Link>
+                </li>
+                <li className='bg-white rounded-lg p-1 mr-3'>
+                    <Link className='text-hizurun-gr' href={`../../cart`}>カート</Link>
+                </li>
+                {!isLoggedIn ? (
+                    <>
+                        <li className='bg-white rounded-lg p-1 mr-3'>
+                            <Link className='text-hizurun-gr' href={`../../sign-up`}>SignUp</Link>
+                        </li>
+                        <li className='bg-hizurun-gr rounded-lg p-1'>
+                            <Link className='text-white' href={`../../login`}>Login</Link>
+                        </li>
+                    </>
+                ) : (
+                    <li className='bg-hizurun-gr rounded-lg p-1'>
+                        <button className='text-white' onClick={handleLogout}>Logout</button>
+                    </li>
+                )}
             </ul>
-            {/* ログインしている場合はダッシュボードを表示 */}
-            {/* {isLoggedIn ? (
-                <Dashboard />
-            ) : (
-                <div className='flex items-center'>
-                    <CustomLink href="../../login" className='no-underline text-lg text-hizurun-gr'>
-                        Login
-                    </CustomLink>
-
-                </div>
-
-            )} */}
         </div>
-    )
-}
+    );
+};
 
 export default Header;

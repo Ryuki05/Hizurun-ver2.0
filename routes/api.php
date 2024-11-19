@@ -9,7 +9,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AdminController;
-
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\RegisterController;
 
 // 誰でもアクセスできるAPIルート
@@ -57,3 +57,13 @@ Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// sign-up
+Route::get('/sign-up', function () {
+    return response()->json(['message' => 'Please use POST method to sign up.'], 405);
+});
+
+
+// POST メソッド（実際にサインアップを処理するルート）
+Route::post('/sign-up', [AuthController::class, 'signup'])
+        ->middleware('throttle:10,1');

@@ -1,105 +1,126 @@
-'use client'
-import { Irish_Grover, M_PLUS_1p } from 'next/font/google';
-import React, { useState } from 'react';
-import CustomLink from '../components/custom-link';
+'use client';
+import { useState } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react'; // signInをインポート
 
+export default function Signup() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState(''); // 確認用パスワードの状態
+  const router = useRouter();
 
-const irishGrover = Irish_Grover({
-    subsets: ['latin'],
-    weight: '400',
-});
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-const mplus1p = M_PLUS_1p({
-    subsets: ['latin'],
-    weight: '500',
-});
-
-const SignUp = () => {
-  // 入力値の状態管理
-  const [name, setName] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  // フォーム送信処理
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (!name || !password) {
-      setError('ユーザー名とパスワードは必須です');
+    // パスワード長さチェック
+    if (password.length < 8) {
+      alert('Password must be at least 8 characters.');
       return;
     }
 
-    setIsSubmitting(true);
-    setError(null);
+    // パスワード確認チェック
+    if (password !== passwordConfirmation) {
+      alert('Password confirmation does not match.');
+      return;
+    }
 
-    // フォームデータを送信
     try {
-      const response = await fetch('http://localhost:8000/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, password }),
-      });
+      const response = await axios.post('http://localhost:8000/api/sign-up', { name, email, password, password_confirmation: passwordConfirmation });
 
-      if (response.ok) {
-        // 登録成功時の処理
-        console.log('ユーザー登録が成功しました');
-        // 例：リダイレクト
-        window.location.href = '/login'; // ログインページにリダイレクトする例
+      if (response.status === 200 || response.status === 201) {
+        alert('Sign up successful!');
+
+        // サインアップ後にログイン処理
+        const { token } = response.data; // サーバーから返されたトークンを取得
+
+        const res = await signIn('credentials', {
+          redirect: false,
+          name,
+          password,
+        });
+
+        if (res?.error) {
+          console.error('Login failed:', res.error); // エラーメッセージをコンソールに表示
+          alert('Login failed');
+        } else {
+          // トークンをlocalStorageに保存
+          localStorage.setItem('token', token);
+          alert('Login successful');
+          router.push('/'); // `page.tsx`に遷移
+        }
       } else {
-        // エラーメッセージの処理
-        const data = await response.json();
-        setError(data.message || '登録に失敗しました');
+        alert('Unexpected response from server.');
       }
     } catch (error) {
-      setError('サーバーとの通信に失敗しました');
-    } finally {
-      setIsSubmitting(false);
+      if (axios.isAxiosError(error)) {
+        const err = error.response?.data;
+        console.error('Axios Error:', err);
+        if (err && err.errors) {
+          const errorMessages = Object.values(err.errors).join(', ');
+          alert(`Sign up failed: ${errorMessages}`);
+        } else {
+          alert('An unexpected error occurred.');
+        }
+      } else {
+        console.error('Unexpected Error:', error);
+        alert('Sign up failed.');
+      }
     }
   };
 
   return (
     <div className='flex flex-col justify-center h-screen items-center'>
-        <CustomLink className='no-underline' href='/'>
-            <h1 className={`text-8xl text-hizurun-gr ${irishGrover.className}`} >Hizurun</h1>
-        </CustomLink>
-        <div className='text-3xl text-center border-2 rounded-lg p-5'>
-            <h1 className={`text-hizurun-gr ${mplus1p.className}`}>新規ユーザー登録</h1>
-            <form onSubmit={handleSubmit}>
-            <div className='flex flex-col m-1'>
-                <label className={`text-hizurun-gr ${irishGrover.className}`} htmlFor="name">UserName</label>
-                <input
-                    className='border-2 rounded-lg p-1'
-                    type="text"
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    placeholder="UserName"
-                />
-            </div>
-            <div className='flex flex-col m-3'>
-                <label className={`text-hizurun-gr ${irishGrover.className}`} htmlFor="password">Password</label>
-                <input
-                    className='border-2 rounded-lg p-1'
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    placeholder="Password"
-                />
-            </div>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <button className={`bg-hizurun-gr px-10 py-1 rounded-lg  ${irishGrover.className}`} type="submit" disabled={isSubmitting}>
-                {isSubmitting ? '送信中...' : 'SignUp'}
-            </button>
-            </form>
+      <h1 className='text-4xl mb-5'>Sign Up</h1>
+      <form onSubmit={handleSignup} className='w-1/3'>
+        <div className='mb-4'>
+          <label className='block text-gray-700'>UserName</label>
+          <input
+            className='w-full border rounded px-3 py-2'
+            type='text'
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
+        <div className='mb-4'>
+          <label className='block text-gray-700'>Email</label>
+          <input
+            className='w-full border rounded px-3 py-2'
+            type='email'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className='mb-4'>
+          <label className='block text-gray-700'>Password</label>
+          <input
+            className='w-full border rounded px-3 py-2'
+            type='password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className='mb-4'>
+          <label className='block text-gray-700'>Confirm Password</label>
+          <input
+            className='w-full border rounded px-3 py-2'
+            type='password'
+            value={passwordConfirmation}
+            onChange={(e) => setPasswordConfirmation(e.target.value)}
+            required
+          />
+        </div>
+        <button
+          type='submit'
+          className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600'
+        >
+          Sign Up
+        </button>
+      </form>
     </div>
   );
-};
-
-export default SignUp;
+}

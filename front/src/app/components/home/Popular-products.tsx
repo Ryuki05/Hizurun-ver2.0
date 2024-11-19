@@ -51,7 +51,7 @@ const Popularproducts = () => {
                 <h2 className={`text-2xl font-bold mb-4 ${mplus1p.className}`}>人気商品</h2>
                 <div className={`flex  space-x-4 relative`}>
                     <SlidebtnLeft/>
-                    <div className={`flex overflow-hidden space-x-4 popular-products`}>
+                    <div className={`flex overflow-hidden space-x-4 recommended-products`}>
                         {data.popularProducts.length > 0 ? (
                             data.popularProducts.map((product: Product) => (
                                 <div className="flex-none w-64 p-4 bg-white rounded shadow" key={product.id}>
