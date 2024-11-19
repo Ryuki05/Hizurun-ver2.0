@@ -61,7 +61,6 @@ const AccountPage = () => {
     return (
         <div className="bg-white text-gray-900">
             <div className="max-w-4xl mx-auto px-6 py-8">
-                {/* ヘッダー部分 */}
                 <h1 className="text-4xl font-serif text-hizurun-gr mb-8">アカウント情報</h1>
 
                 {/* プロフィールセクション */}
