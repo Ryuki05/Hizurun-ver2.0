@@ -70,12 +70,12 @@ const Header = () => {
         <div className='border-b-2 border-btm-hizurun-gr flex justify-between items-center p-4'>
             <CustomLink className="no-underline flex items-center space-x-4" href="/">
                 <Image
-                    src="/image/Hizurun-ico.png"
+                    src="/image/Hizurun-footer.png"
                     alt="Hizurun Icon"
                     width={100}
                     height={100}
                     style={{ objectFit: "cover" }}
-                    className="rounded"
+                    className="rounded my-2"
                 />
                 <h1 className={`text-6xl text-hizurun-gr ${irishGrover.className}`}>Hizurun</h1>
             </CustomLink>

@@ -1,0 +1,69 @@
+import { useEffect, useState } from 'react';
+import { Irish_Grover, M_PLUS_1p } from 'next/font/google';
+
+const irishGrover = Irish_Grover({
+    subsets: ['latin'],
+    weight: '400',
+});
+
+const mplus1p = M_PLUS_1p({
+    subsets: ['latin'],
+    weight: '400',
+});
+
+const OpeningShutter: React.FC = () => {
+    const [isVisible, setIsVisible] = useState(true); // コンポーネントの表示管理
+    const [isFadingOut, setIsFadingOut] = useState(false); // フェードアウト管理
+
+    useEffect(() => {
+        const hasSeenShutter = localStorage.getItem('hasSeenShutter');
+
+        if (hasSeenShutter) {
+            setIsVisible(false);
+        } else {
+            // 3秒後にフェードアウトを開始
+            const fadeOutTimer = setTimeout(() => {
+                setIsFadingOut(true); // フェードアウト開始
+            }, 3000);
+
+            // フェードアウト後に完全に非表示にする
+            const hideTimer = setTimeout(() => {
+                setIsVisible(false); // 完全に非表示に
+                localStorage.setItem('hasSeenShutter', 'true');
+            }, 4000); // フェードアウトが終了して1秒後に非表示にする
+
+            return () => {
+                clearTimeout(fadeOutTimer);
+                clearTimeout(hideTimer);
+            };
+        }
+    }, []);
+
+    if (!isVisible) return null; // isVisible が false の場合はコンポーネントを非表示にする
+
+    return (
+        <div
+            className={`
+                fixed
+                z-50
+                top-0
+                left-0
+                w-full
+                h-full
+                flex
+                items-center
+                justify-center
+                bg-hizurun-gr
+                transition-opacity
+                duration-1000
+                ${isFadingOut ? 'opacity-0' : 'opacity-100'}
+            `}
+        >
+            <h1 className={`text-white text-4xl ${mplus1p.className}`}>
+                ようこそ、<span className={`${irishGrover.className}`}>Hizurun</span>へ！
+            </h1>
+        </div>
+    );
+};
+
+export default OpeningShutter;

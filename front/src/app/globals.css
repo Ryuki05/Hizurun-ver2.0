@@ -10,6 +10,22 @@
     background-clip: text;
     color: transparent;
 }
+
+.text-hizurun-gr-shouji {
+    background: linear-gradient(
+        to bottom,
+        #ffb4c1,
+        #ffb1bf,
+        #fbc2c9,
+        #ffd1d9,
+        #fedbe1
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
 /* src/app/globals.css またはメインのCSSファイルに追加 */
 .bg-hizurun-gr {
     background: linear-gradient(to bottom, #ffb4c1, #ffb1bf, #fbc2c9, #ffd1d9);

@@ -1,6 +1,7 @@
-'use client';  // クライアントサイドコンポーネントとしてマーク
+'use client';
 
-import { SessionProvider } from 'next-auth/react'; // 追加
+import { useState } from "react";
+import { SessionProvider } from 'next-auth/react';
 import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
 import "./globals.css";
@@ -10,15 +11,27 @@ import Featuredproducts from './components/home/Featured-products';
 import Categories from './components/Categories';
 
 const HomePage = () => {
+    const [isShutterVisible, setIsShutterVisible] = useState(true);
+
+    // オープニングシャッター終了後に呼び出される
+    const handleAnimationEnd = () => {
+        setIsShutterVisible(false); // シャッターを非表示にする
+    };
+
     return (
-        <SessionProvider>  {/* SessionProviderでラップ */}
+        <SessionProvider>
             <div className={`bg-gray-100`}>
-                <OpeningShutter />
-                <Header />
-                <Popularproducts />
-                <Categories />
-                <Featuredproducts />
-                <Footer />
+                {isShutterVisible ? (
+                    <OpeningShutter onAnimationEnd={handleAnimationEnd} />
+                ) : (
+                    <>
+                        <Header />
+                        <Popularproducts />
+                        <Categories />
+                        <Featuredproducts />
+                        <Footer />
+                    </>
+                )}
             </div>
         </SessionProvider>
     );
