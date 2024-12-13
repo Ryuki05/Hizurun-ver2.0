@@ -6,6 +6,8 @@ import Link from 'next/link';
 import SearchContainer from './search/SearchContainer';
 import Image from 'next/image';
 import { signOut } from 'next-auth/react';  // signOutをインポート
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 const irishGrover = Irish_Grover({
     subsets: ['latin'],
@@ -35,6 +37,9 @@ interface ProductListData {
 const Header = () => {
     const [data, setData] = useState<ProductListData | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [email] = useState('');
+    const [password] = useState('');
+    const router = useRouter();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -60,6 +65,25 @@ const Header = () => {
         localStorage.removeItem('token');
         setIsLoggedIn(false);
         signOut({ redirect: false }); // next-authのsignOutを実行
+    };
+
+    const handleSignUp = () => {
+        router.push('/sign-up');  // サインアップフォームのページに遷移
+    };
+
+    const handleLogin = async () => {
+        try {
+            const response = await axios.post('http://localhost:8000/api/login', {
+                email,
+                password,
+            });
+            console.log('Login Success:', response.data);
+            // ログイン成功後の処理（例: トークンをlocalStorageに保存）
+            localStorage.setItem('token', response.data.token);
+            setIsLoggedIn(true);
+        } catch (error) {
+            console.error('Login Error:', error);
+        }
     };
 
     if (!data) {
@@ -94,10 +118,10 @@ const Header = () => {
                 {!isLoggedIn ? (
                     <>
                         <li className='bg-white rounded-lg p-1 mr-3'>
-                            <Link className='text-hizurun-gr' href={`../../sign-up`}>SignUp</Link>
+                            <button className='text-hizurun-gr' onClick={handleSignUp}>SignUp</button>
                         </li>
                         <li className='bg-hizurun-gr rounded-lg p-1'>
-                            <Link className='text-white' href={`../../login`}>Login</Link>
+                            <button className='text-white' onClick={handleLogin}>Login</button>
                         </li>
                     </>
                 ) : (

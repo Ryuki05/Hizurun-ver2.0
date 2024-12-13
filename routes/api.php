@@ -54,12 +54,14 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
 
 // ユーザー情報の取得
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:sanctum')->post('/user', function (Request $request) {
     return $request->user();
 });
 
 // sign-up
-Route::get('/sign-up', function () {
+// Route::post('/sign-up', [AuthController::class, 'register']);
+
+Route::post('/sign-up', function () {
     return response()->json(['message' => 'Please use POST method to sign up.'], 405);
 });
 
@@ -67,3 +69,6 @@ Route::get('/sign-up', function () {
 // POST メソッド（実際にサインアップを処理するルート）
 Route::post('/sign-up', [AuthController::class, 'signup'])
         ->middleware('throttle:10,1');
+
+// login
+Route::post('/login',[AuthController::class, 'login']);
