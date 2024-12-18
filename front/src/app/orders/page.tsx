@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../components/header/Header';
 import Footer from '../components/footer/Footer';
-
+import '../globals.css'
 interface CartItem {
   product: {
     id: number;
@@ -45,6 +45,7 @@ const Orders = () => {
     fetchOrderSummary();
   }, []);
 
+
   // 注文確定
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +80,8 @@ const Orders = () => {
     });
 
     if (response.ok) {
-      router.push('/order-confirmation'); // 注文確認ページに遷移
+        alert('注文を確定しました');
+        router.push('/');
     } else {
       console.error('注文確定に失敗しました');
     }
@@ -92,7 +94,7 @@ const Orders = () => {
   return (
     <div className=" min-h-screen">
       <Header />
-      <div className="max-w-3xl mx-auto px-4 py-10 hizurun-border">
+      <div className="max-w-3xl mt-3 mx-auto px-4 py-10 hizurun-border">
 
         <form onSubmit={handleSubmit} className="hizurun-border-inner bg-white p-8 rounded-lg shadow-lg">
             <div className="text-center">

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import SearchContainer from './search/SearchContainer';
 import Image from 'next/image';
 import { signOut } from 'next-auth/react';  // signOutをインポート
-import axios from 'axios';
+// import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 const irishGrover = Irish_Grover({
@@ -37,8 +37,8 @@ interface ProductListData {
 const Header = () => {
     const [data, setData] = useState<ProductListData | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [email] = useState('');
-    const [password] = useState('');
+    // const [email] = useState('');
+    // const [password] = useState('');
     const router = useRouter();
 
     useEffect(() => {
@@ -71,20 +71,19 @@ const Header = () => {
         router.push('/sign-up');  // サインアップフォームのページに遷移
     };
 
-    const handleLogin = async () => {
-        try {
-            const response = await axios.post('http://localhost:8000/api/login', {
-                email,
-                password,
-            });
-            console.log('Login Success:', response.data);
-            // ログイン成功後の処理（例: トークンをlocalStorageに保存）
-            localStorage.setItem('token', response.data.token);
-            setIsLoggedIn(true);
-        } catch (error) {
-            console.error('Login Error:', error);
-        }
-    };
+    // const handleLogin = async () => {
+    //     try {
+    //         const response = await axios.post('http://localhost:8000/api/login', {
+    //             email,
+    //             password,
+    //         });
+    //         console.log('Login Success:', response.data);
+    //         localStorage.setItem('token', response.data.token);
+    //         setIsLoggedIn(true);
+    //     } catch (error) {
+    //         console.error('Login Error:', error);
+    //     }
+    // };
 
     if (!data) {
         return <div>読み込み中...</div>;
@@ -117,11 +116,8 @@ const Header = () => {
                 </li>
                 {!isLoggedIn ? (
                     <>
-                        <li className='bg-white rounded-lg p-1 mr-3'>
-                            <button className='text-hizurun-gr' onClick={handleSignUp}>SignUp</button>
-                        </li>
-                        <li className='bg-hizurun-gr rounded-lg p-1'>
-                            <button className='text-white' onClick={handleLogin}>Login</button>
+                        <li className='bg-hizurun-gr rounded-lg p-1 mr-3'>
+                            <button className='text-white' onClick={handleSignUp}>SignUp</button>
                         </li>
                     </>
                 ) : (

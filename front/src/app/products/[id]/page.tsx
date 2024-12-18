@@ -4,7 +4,7 @@ import Footer from '@/app/components/footer/Footer';
 import Reviews from '@/app/components/product/Reviews';
 import Relat from '../../components/product/Relat';
 import Buy from '@/app/components/product/Buy';
-
+import "../../globals.css";
 
 
 const ProductDetailPage = () => {
