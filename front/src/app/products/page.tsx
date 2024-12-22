@@ -1,7 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Image from 'next/image'; // Imageコンポーネントをインポート
+import Image from 'next/image';
+import Link from 'next/link';
 
 interface Category {
     id: number;
@@ -36,9 +37,15 @@ const ProductListPage = () => {
         const fetchData = async () => {
             try {
                 const params = new URLSearchParams();
-                if (search) params.append('search', search);
-                if (category) params.append('category', category);
-                if (sort) params.append('sort', sort);
+                if (search) {
+                    params.append('search', search);
+                }
+                if (category) {
+                    params.append('category', category);
+                }
+                if (sort) {
+                    params.append('sort', sort);
+                }
 
                 const response = await fetch(`http://localhost:8000/api/products?${params.toString()}`);
                 if (!response.ok) {
@@ -66,18 +73,19 @@ const ProductListPage = () => {
                     data.products.map((product) => (
                         <div key={product.id}>
                             <div>
-                                <Image
-                                    src={product.image_path}
-                                    alt={product.name}
-                                    width={200}
-                                    height={200}
-                                    layout="responsive"
-                                />
-                                <div>
-                                    <h3>{product.name}</h3>
-                                    <p>価格: ¥{new Intl.NumberFormat().format(product.price)}</p>
-                                    <a href={`/products/${product.id}`}>詳細を見る</a>
-                                </div>
+                                <Link href={`/products/${product.id}`}>
+                                    <Image
+                                        src={product.image_path}
+                                        alt={product.name}
+                                        width={200}
+                                        height={200}
+                                        layout="responsive"
+                                    />
+                                    <div>
+                                        <h3>{product.name}</h3>
+                                        <p>価格: ¥{new Intl.NumberFormat().format(product.price)}</p>
+                                    </div>
+                                </Link>
                             </div>
                         </div>
                     ))
