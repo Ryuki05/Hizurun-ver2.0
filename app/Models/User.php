@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use App\Models\CartItem;  // CartItemモデルをインポート
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Product;
+use App\Models\CartItem;
+use App\Models\Order;
+use App\Models\Review;
+
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -58,7 +62,8 @@ class User extends Authenticatable
      */
     public function wishlist(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class, 'wishlist')->withTimestamps();
+        return $this->belongsToMany(Product::class, 'wishlists', 'user_id', 'product_id')
+                    ->withTimestamps();
     }
 
     /**

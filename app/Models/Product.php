@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\User;
 
 class Product extends Model
 {
@@ -23,7 +26,7 @@ class Product extends Model
     /**
      * 商品が属するカテゴリーを取得
      */
-    public function category()
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
@@ -63,9 +66,9 @@ class Product extends Model
     /**
      * 商品がウィッシュリストに追加されているユーザーを取得
      */
-    public function wishlistedBy()
+    public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'wishlist')->withTimestamps();
+        return $this->belongsToMany(User::class, 'wishlist');
     }
 
     /**
@@ -113,6 +116,6 @@ class Product extends Model
      */
     public function isWishlistedBy(User $user)
     {
-        return $this->wishlistedBy()->where('user_id', $user->id)->exists();
+        return $this->users()->where('user_id', $user->id)->exists();
     }
 }

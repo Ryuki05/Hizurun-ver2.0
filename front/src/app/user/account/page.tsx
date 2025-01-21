@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // app router用のnext/navigationをインポート
 import Image from 'next/image';
+import axios from 'axios';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // ユーザー情報の型を定義
 interface User {
@@ -31,29 +34,43 @@ const AccountPage = () => {
     const router = useRouter();
 
     useEffect(() => {
-        // ユーザー情報を取得
         const fetchUserData = async () => {
-            const response = await fetch('/api/user');
-            const data = await response.json();
-            setUser(data.user);
-            setOrders(data.orders);
-            setWishlist(data.wishlist);
+            try {
+                const response = await axios.get(`${API_URL}/api/user/account`, {
+                    withCredentials: true
+                });
+                if (response.data.user) {
+                    setUser(response.data.user);
+                    setOrders(response.data.orders || []);
+                    setWishlist(response.data.wishlist || []);
+                } else {
+                    router.push('/sign-up');
+                }
+            } catch (error) {
+                console.error('ユーザー情報の取得に失敗:', error);
+                router.push('/sign-up');
+            }
         };
 
         fetchUserData();
-    }, []);
+    }, [router]);
 
     const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const response = await fetch('/api/user/update', {
-            method: 'PATCH',
-            body: formData,
-        });
+        try {
+            const formData = new FormData(e.currentTarget);
+            const response = await axios.patch(`${API_URL}/api/user/account`, {
+                name: formData.get('name'),
+                email: formData.get('email')
+            }, {
+                withCredentials: true
+            });
 
-        if (response.ok) {
-            router.refresh(); // router.reload() の代わりに router.refresh() を使用
-        } else {
+            if (response.data) {
+                setUser(response.data.user);
+                alert('更新が完了しました');
+            }
+        } catch {
             console.error('更新エラーが発生しました。');
         }
     };

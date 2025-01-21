@@ -2,7 +2,9 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+
+// axios.postのURLを環境変数から取得するように修正
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function AuthForm() {
     const [formType, setFormType] = useState<'login' | 'register'>('login');
@@ -20,9 +22,9 @@ export default function AuthForm() {
         }
 
         // CSRF トークンを取得
-        axios.post('http://localhost:8000/api/csrf-token')
+        axios.post(`${API_URL}/api/csrf-token`)
             .then((response) => {
-                setCsrfToken(response.data.csrfToken); // サーバーから受け取ったトークンを保存
+                setCsrfToken(response.data.csrfToken);
             })
             .catch((error) => {
                 console.error('CSRF トークンの取得に失敗:', error);
@@ -32,49 +34,71 @@ export default function AuthForm() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await signIn('credentials', {
-                redirect: false,
+            const response = await axios.post(`${API_URL}/api/login`, {
                 email,
                 password,
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
             });
 
-            if (res?.error) {
-                alert('ログインに失敗しました');
-            } else {
+            if (response.data.status === 'success') {
                 alert('ログイン成功');
                 router.push('/');
+            } else {
+                alert('ログインに失敗しました');
             }
         } catch (error) {
-            console.error('ログインエラー:', error);
-            alert('予期せぬエラーが発生しました');
+            if (axios.isAxiosError(error)) {
+                const message = error.response?.data?.message || 'ログインに失敗しました';
+                alert(message);
+            }
         }
     };
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-
         try {
-            // CSRF トークンをリクエストヘッダーに追加
-            const response = await axios.post('http://localhost:8000/api/sign-up', {
+            console.log('送信データ:', { name, email, password });
+
+            const response = await axios.post(`${API_URL}/api/sign-up`, {
                 name,
                 email,
                 password,
             }, {
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken, // CSRFトークンをヘッダーに追加
-                }
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
             });
 
-            if (response.status === 200 || response.status === 201) {
+            console.log('レスポンス:', response.data);
+
+            if (response.data.status === 'success') {
                 alert('登録成功');
-                setFormType('login');
-                localStorage.setItem('formType', 'login');
-            } else {
-                alert('サーバーから予期しない応答を受け取りました');
+                router.push('/');
             }
         } catch (error) {
-            console.error('登録エラー:', error);
-            alert('登録中にエラーが発生しました');
+            if (axios.isAxiosError(error)) {
+                console.error('Registration error:', {
+                    status: error.response?.status,
+                    data: error.response?.data,
+                    headers: error.response?.headers
+                });
+
+                const errorMessage = error.response?.data?.message
+                    || error.response?.data?.error
+                    || (error.response?.data?.errors && Object.values(error.response?.data?.errors as Record<string, string[]>)[0]?.[0])
+                    || '登録に失敗しました';
+
+                alert(errorMessage);
+            }
         }
     };
 

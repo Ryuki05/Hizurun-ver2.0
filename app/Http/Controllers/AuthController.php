@@ -2,48 +2,60 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
-use App\Models\User;  // User モデルをインポート
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     /**
      * サインアップ処理
      */
-    public function signup(Request $request)
+    public function register(Request $request)
     {
         try {
-            // バリデーション
             $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => 'required|email|unique:users,email',
-                'password' => 'required|string|min:8', // confirmedを削除
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
             ]);
 
-            // ユーザー作成
+            Log::info('Validation passed', $request->all());
+
             $user = User::create([
-                'name' => $request->input('name'),
-                'email' => $request->input('email'),
-                'password' => Hash::make($request->input('password')),
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
             ]);
 
-            return response()->json([
-                'message' => 'User created successfully.',
-                'user' => $user,
-            ], 201); // HTTP 201 Created
+            Log::info('User created', ['user_id' => $user->id]);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+            Auth::login($user);
+
             return response()->json([
-                'message' => 'Validation error',
-                'errors' => $e->errors(),
-            ], 422); // HTTP 422 Unprocessable Entity
+                'status' => 'success',
+                'message' => 'ユーザー登録が完了しました',
+                'user' => $user
+            ], 201);
+
+        } catch (ValidationException $e) {
+            Log::error('Validation error', ['errors' => $e->errors()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => '入力内容を確認してください',
+                'errors' => $e->errors()
+            ], 422);
 
         } catch (\Exception $e) {
+            Log::error('Registration error', ['error' => $e->getMessage()]);
             return response()->json([
-                'message' => 'An error occurred',
-                'error' => $e->getMessage(),
-            ], 500); // HTTP 500 Internal Server Error
+                'status' => 'error',
+                'message' => '登録処理中にエラーが発生しました',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -52,30 +64,34 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        // バリデーション
         $request->validate([
-            'name' => 'required|string|max:255',
-            'password' => 'required|string|min:8',
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        // ユーザー取得
-        $user = User::where('email', $request->input('email'))->first();
+        if (Auth::attempt($request->only('email', 'password'))) {
+            $request->session()->regenerate();
 
-        if (!$user || !Hash::check($request->input('password'), $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401); // HTTP 401 Unauthorized
+            return response()->json([
+                'status' => 'success',
+                'message' => 'ログインに成功しました'
+            ]);
         }
 
-        // トークン発行
-        $token = $user->createToken('Hizurun')->plainTextToken;
+        throw ValidationException::withMessages([
+            'email' => ['認証情報が正しくありません'],
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json([
-            'message' => 'Login successful',
-            'token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ]
-        ], 200); // HTTP 200 OK
+            'status' => 'success',
+            'message' => 'ログアウトしました'
+        ]);
     }
 }

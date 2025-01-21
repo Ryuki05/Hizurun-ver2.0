@@ -24,7 +24,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/cart', [CartController::class, 'apiDestroy']);
 
     // ユーザーアカウント関連
-    Route::get('/user/account', [UserController::class, 'show'])->name('api.user.account');
+    Route::get('/user/account', [UserController::class, 'show']);
     Route::patch('/user/account', [UserController::class, 'update'])->name('api.user.update');
     Route::get('/user/wishlist', [UserController::class, 'wishlist'])->name('api.user.wishlist');
     Route::post('/user/wishlist', [UserController::class, 'addToWishlist'])->name('api.user.wishlist.add');
@@ -58,17 +58,27 @@ Route::middleware('auth:sanctum')->post('/user', function (Request $request) {
     return $request->user();
 });
 
-// sign-up
-// Route::post('/sign-up', [AuthController::class, 'register']);
+// 以下の重複したルートを削除
+// - Route::post('/sign-up', function () {
+// -     return response()->json(['message' => 'Please use POST method to sign up.'], 405);
+// - });
 
-Route::post('/sign-up', function () {
-    return response()->json(['message' => 'Please use POST method to sign up.'], 405);
+// - Route::post('/sign-up', [AuthController::class, 'signup'])
+// -         ->middleware('throttle:10,1');
+
+// - Route::get('/csrf-token', function () {
+// -     return response()->json(['csrfToken' => csrf_token()]);
+// - });
+
+// - Route::post('/login', [AuthController::class, 'login'])->middleware('cors');
+
+// 以下のルートグループのみを残す
+Route::middleware(['api'])->group(function () {
+    Route::post('/csrf-token', function () {
+        return response()->json(['csrfToken' => csrf_token()]);
+    });
+
+    Route::post('/sign-up', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 });
-
-
-// POST メソッド（実際にサインアップを処理するルート）
-Route::post('/sign-up', [AuthController::class, 'signup'])
-        ->middleware('throttle:10,1');
-
-// login
-Route::post('/login',[AuthController::class, 'login']);

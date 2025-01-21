@@ -17,16 +17,13 @@ class UserController extends Controller
     /**
      * ユーザーアカウント情報をJSONで返す
      */
-    public function show()
+    public function show(Request $request)
     {
-        $user = Auth::user();
-        $orders = $user->orders()->latest()->take(5)->get();
-        $wishlistItems = $user->wishlist()->get();
-
+        $user = $request->user();
         return response()->json([
             'user' => $user,
-            'orders' => $orders,
-            'wishlistItems' => $wishlistItems,
+            'orders' => $user->orders,
+            'wishlist' => $user->wishlist
         ]);
     }
 
@@ -36,18 +33,17 @@ class UserController extends Controller
     public function update(Request $request)
     {
         $user = Auth::user();
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            // 他の必要なバリデーションルールを追加
         ]);
 
-        $user->update($validated);
+        User::where('id', $user->id)->update($validated);
+        $updatedUser = User::find($user->id);
 
         return response()->json([
             'message' => 'プロフィールが更新されました。',
-            'user' => $user,
+            'user' => $updatedUser,
         ]);
     }
 
@@ -56,9 +52,14 @@ class UserController extends Controller
      */
     public function wishlist()
     {
-        $wishlistItems = Auth::user()->wishlist()->get();
+        $wishlistItems = Auth::user()->wishlist()
+            ->with('category')  // 必要に応じて関連データを取得
+            ->get();
 
-        return response()->json($wishlistItems);
+        return response()->json([
+            'status' => 'success',
+            'wishlist' => $wishlistItems
+        ]);
     }
 
     /**
@@ -67,7 +68,7 @@ class UserController extends Controller
     public function addToWishlist(Request $request)
     {
         $product = Product::findOrFail($request->product_id);
-        auth()->user()->wishlist()->attach($product->id);
+        Auth::user()->wishlist()->attach($product->id);
 
         return response()->json([
             'message' => '商品がウィッシュリストに追加されました。',
