@@ -1,3 +1,4 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { M_PLUS_1p } from 'next/font/google';
@@ -38,7 +39,7 @@ interface Product {
 const Reviews = () => {
   const { id } = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { status } = useSession();
   const [product, setProduct] = useState<Product | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
@@ -69,7 +70,7 @@ const Reviews = () => {
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!session) {
+    if (status !== 'authenticated') {
       alert('レビューを投稿するにはログインが必要です');
       router.push('/sign-up');
       return;
@@ -77,33 +78,41 @@ const Reviews = () => {
 
     setIsSubmitting(true);
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('認証トークンがありません');
+      }
+
       const response = await fetch(`http://localhost:8000/api/products/${id}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
         },
         body: JSON.stringify({
           rating,
-          comment,
-        }),
+          comment
+        })
       });
 
-      if (response.ok) {
-        alert('レビューを投稿しました');
-        setComment('');
-        setRating(5);
-        // 商品情報を再取得して最新のレビューを表示
-        const updatedResponse = await fetch(`http://localhost:8000/api/products/${id}`);
-        if (updatedResponse.ok) {
-          const updatedProduct: Product = await updatedResponse.json();
-          setProduct(updatedProduct);
-        }
-      } else {
-        alert('レビューの投稿に失敗しました');
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'レビューの投稿に失敗しました');
       }
+
+      alert('レビューを投稿しました');
+      setComment('');
+      setRating(5);
+
+      // 商品情報を再取得
+      const productResponse = await fetch(`http://localhost:8000/api/products/${id}`);
+      const updatedProduct = await productResponse.json();
+      setProduct(updatedProduct);
+
     } catch (error) {
       console.error('レビュー投稿エラー:', error);
-      alert('レビューの投稿中にエラーが発生しました');
+      alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');
     } finally {
       setIsSubmitting(false);
     }

@@ -20,7 +20,13 @@ const ReviewsPage = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/products/${productId}/reviews`)
+        const token = localStorage.getItem('token')
+        const response = await fetch(`http://localhost:8000/api/products/${productId}/reviews`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        })
         if (!response.ok) {
           throw new Error('レビューの取得に失敗しました')
         }

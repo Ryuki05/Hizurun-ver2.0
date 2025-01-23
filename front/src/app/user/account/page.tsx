@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // app router用のnext/navigationをインポート
 import Image from 'next/image';
 import axios from 'axios';
+import Header from '@/app/components/header/Header';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -77,6 +78,7 @@ const AccountPage = () => {
 
     return (
         <div className="bg-white text-gray-900">
+            <Header />
             <div className="max-w-4xl mx-auto px-6 py-8">
                 <h1 className="text-4xl font-serif text-hizurun-gr mb-8">アカウント情報</h1>
 

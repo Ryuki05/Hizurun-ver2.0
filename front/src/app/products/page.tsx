@@ -47,7 +47,14 @@ const ProductListPage = () => {
                     params.append('sort', sort);
                 }
 
-                const response = await fetch(`http://localhost:8000/api/products?${params.toString()}`);
+                const token = localStorage.getItem('token');
+                const response = await fetch(`http://localhost:8000/api/products?${params.toString()}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
                 if (!response.ok) {
                     throw new Error('データの取得に失敗しました');
                 }

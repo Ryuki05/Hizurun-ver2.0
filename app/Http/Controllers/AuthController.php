@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -17,7 +17,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
@@ -26,11 +26,13 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        Auth::login($user);
+        $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
             'status' => 'success',
-            'message' => 'ユーザー登録が完了しました'
+            'message' => '登録が完了しました',
+            'token' => $token,
+            'user' => $user
         ]);
     }
 
@@ -41,34 +43,30 @@ class AuthController extends Controller
     {
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required',
+            'password' => 'required'
         ]);
 
-        if (Auth::attempt($credentials, true)) {
-            $request->session()->regenerate();
-
+        if (Auth::attempt($credentials)) {
             $user = Auth::user();
             $token = $user->createToken('auth-token')->plainTextToken;
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'ログインに成功しました',
-                'user' => $user,
-                'token' => $token
+                'message' => 'ログインしました',
+                'token' => $token,
+                'user' => $user
             ]);
         }
 
         return response()->json([
             'status' => 'error',
-            'message' => '認証情報が正しくありません'
+            'message' => 'メールアドレスまたはパスワードが間違っています'
         ], 401);
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json([
             'status' => 'success',

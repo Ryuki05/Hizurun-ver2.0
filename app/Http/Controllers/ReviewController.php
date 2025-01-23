@@ -10,7 +10,7 @@ class ReviewController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth:sanctum');
     }
 
     /**
@@ -24,15 +24,16 @@ class ReviewController extends Controller
         ]);
 
         $review = new Review();
-        $review->user_id = auth()->id();
+        $review->user_id = $request->user()->id;
         $review->product_id = $product->id;
         $review->rating = $validatedData['rating'];
         $review->comment = $validatedData['comment'];
         $review->save();
 
         return response()->json([
-            'message' => 'レビューが投稿されました。',
-            'review' => $review,
-        ], 201); // 201 Created
+            'status' => 'success',
+            'message' => 'レビューが投稿されました',
+            'review' => $review->load('user')
+        ], 201);
     }
 }
