@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -10,20 +10,41 @@ export default function Header() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const router = useRouter();
 
-    useEffect(() => {
-        checkAuthStatus();
-    }, []);
-
-    const checkAuthStatus = async () => {
+    const checkAuthStatus = useCallback(async () => {
         try {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                setIsLoggedIn(false);
+                return;
+            }
+
             const response = await axios.get(`${API_URL}/api/user/account`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
                 withCredentials: true
             });
-            setIsLoggedIn(!!response.data.user);
+
+            if (response.data.user) {
+                setIsLoggedIn(true);
+            } else {
+                setIsLoggedIn(false);
+                if (window.location.pathname !== '/sign-up') {
+                    router.push('/sign-up');
+                }
+            }
         } catch {
             setIsLoggedIn(false);
+            localStorage.removeItem('auth_token');
+            if (window.location.pathname !== '/sign-up') {
+                router.push('/sign-up');
+            }
         }
-    };
+    }, [router]);
+
+    useEffect(() => {
+        checkAuthStatus();
+    }, [checkAuthStatus]);
 
     const handleLogout = async () => {
         try {
@@ -65,4 +86,4 @@ export default function Header() {
             </nav>
         </header>
     );
-} 
+}

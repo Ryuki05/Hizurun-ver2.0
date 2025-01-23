@@ -17,10 +17,16 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    /**
+   *  一括割り当て可能な属性
+   *
+   * @var array<int, string>
+   */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'remember_token',
     ];
 
     protected $hidden = [

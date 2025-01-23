@@ -47,10 +47,14 @@ export default function AuthForm() {
             });
 
             if (response.data.status === 'success') {
+                // トークンをローカルストレージに保存
+                localStorage.setItem('auth_token', response.data.token);
+
+                // ヘッダーにデフォルトのAuthorizationヘッダーを設定
+                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+
                 alert('ログイン成功');
-                router.push('/');
-            } else {
-                alert('ログインに失敗しました');
+                router.push('/user/account');
             }
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -81,8 +85,16 @@ export default function AuthForm() {
             console.log('レスポンス:', response.data);
 
             if (response.data.status === 'success') {
-                alert('登録成功');
-                router.push('/');
+                // 登録成功後に認証状態を確認
+                const userResponse = await axios.get(`${API_URL}/api/user/account`, {
+                    withCredentials: true
+                });
+
+                if (userResponse.data.user) {
+                    alert('登録成功');
+                    router.push('/user/account');
+                    router.refresh(); // ヘッダーの状態を更新
+                }
             }
         } catch (error) {
             if (axios.isAxiosError(error)) {

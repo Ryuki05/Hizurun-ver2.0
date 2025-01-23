@@ -19,12 +19,20 @@ class UserController extends Controller
      */
     public function show(Request $request)
     {
-        $user = $request->user();
-        return response()->json([
-            'user' => $user,
-            'orders' => $user->orders,
-            'wishlist' => $user->wishlist
-        ]);
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            return response()->json([
+                'user' => $user,
+                'orders' => $user->orders,
+                'wishlist' => $user->wishlist
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Server Error'], 500);
+        }
     }
 
     /**
@@ -50,29 +58,29 @@ class UserController extends Controller
     /**
      * ウィッシュリストの取得
      */
-    public function wishlist()
-    {
-        $wishlistItems = Auth::user()->wishlist()
-            ->with('category')  // 必要に応じて関連データを取得
-            ->get();
+    // public function wishlist()
+    // {
+    //     $wishlistItems = Auth::user()->wishlist()
+    //         ->with('category')
+    //         ->get();
 
-        return response()->json([
-            'status' => 'success',
-            'wishlist' => $wishlistItems
-        ]);
-    }
+    //     return response()->json([
+    //         'status' => 'success',
+    //         'wishlist' => $wishlistItems
+    //     ]);
+    // }
 
     /**
      * ウィッシュリストに商品を追加
      */
-    public function addToWishlist(Request $request)
-    {
-        $product = Product::findOrFail($request->product_id);
-        Auth::user()->wishlist()->attach($product->id);
+    // public function addToWishlist(Request $request)
+    // {
+    //     $product = Product::findOrFail($request->product_id);
+    //     Auth::user()->wishlist()->attach($product->id);
 
-        return response()->json([
-            'message' => '商品がウィッシュリストに追加されました。',
-            'product' => $product,
-        ]);
-    }
+    //     return response()->json([
+    //         'message' => '商品がウィッシュリストに追加されました。',
+    //         'product' => $product,
+    //     ]);
+    // }
 }
