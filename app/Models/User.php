@@ -27,6 +27,7 @@ class User extends Authenticatable
         'email',
         'password',
         'remember_token',
+        'cart_session',
     ];
 
     protected $hidden = [
@@ -37,6 +38,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'cart_session' => 'array',
+        'is_admin' => 'boolean',
     ];
 
     /**
@@ -104,5 +107,22 @@ class User extends Authenticatable
     public function toggleWishlist(Product $product)
     {
         return $this->wishlist()->toggle($product);
+    }
+
+    /**
+     * ユーザーのセッション情報を更新
+     */
+    public function updateCartSession(array $cartData): void
+    {
+        $this->cart_session = $cartData;
+        $this->save();
+    }
+
+    /**
+     * ユーザーのセッション情報を取得
+     */
+    public function getCartSession(): ?array
+    {
+        return $this->cart_session;
     }
 }

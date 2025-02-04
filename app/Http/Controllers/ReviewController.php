@@ -8,13 +8,8 @@ use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-    }
-
     /**
-     * レビューを保存 (API)
+     * レビューを保存 (API) - ログインなしで可能
      */
     public function store(Request $request, Product $product)
     {
@@ -24,7 +19,7 @@ class ReviewController extends Controller
         ]);
 
         $review = new Review();
-        $review->user_id = $request->user()->id;
+        $review->user_id = $request->user() ? $request->user()->id : null; // ログインしていない場合は null
         $review->product_id = $product->id;
         $review->rating = $validatedData['rating'];
         $review->comment = $validatedData['comment'];
@@ -33,7 +28,7 @@ class ReviewController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'レビューが投稿されました',
-            'review' => $review->load('user')
+            'review' => $review->load('user'),
         ], 201);
     }
 }

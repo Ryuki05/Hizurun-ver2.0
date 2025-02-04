@@ -13,14 +13,21 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->nullable(); // ユーザーIDを nullable に変更
             $table->unsignedBigInteger('product_id');
             $table->integer('rating');
             $table->text('comment');
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('product_id')->references('id')->on('products');
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users')
+                ->nullOnDelete(); // ユーザーが削除されてもレビューは保持
+
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();
         });
     }
 

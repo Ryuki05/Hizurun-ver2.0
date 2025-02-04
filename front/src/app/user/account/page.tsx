@@ -4,14 +4,9 @@ import { useRouter } from 'next/navigation'; // app router用のnext/navigation�
 import Image from 'next/image';
 import axios from 'axios';
 import Header from '@/app/components/header/Header';
+import { useAuth } from '@/app/contexts/AuthContext';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-// ユーザー情報の型を定義
-interface User {
-    name: string;
-    email: string;
-}
 
 // 注文情報の型を定義
 interface Order {
@@ -29,50 +24,77 @@ interface WishlistItem {
 }
 
 const AccountPage = () => {
-    const [user, setUser] = useState<User | null>(null);
+    const router = useRouter();
+    const { user, checkAuth } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
-    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const response = await axios.get(`${API_URL}/api/user/account`, {
-                    withCredentials: true
-                });
-                if (response.data.user) {
-                    setUser(response.data.user);
-                    setOrders(response.data.orders || []);
-                    setWishlist(response.data.wishlist || []);
-                } else {
-                    router.push('/sign-up');
-                }
-            } catch (error) {
-                console.error('ユーザー情報の取得に失敗:', error);
+        const initializeAuth = async () => {
+            setIsLoading(true);
+            const isAuthed = await checkAuth();
+            if (!isAuthed) {
                 router.push('/sign-up');
+                return;
             }
+            await fetchUserData();
+            setIsLoading(false);
         };
 
-        fetchUserData();
-    }, [router]);
+        initializeAuth();
+    }, []);
+
+    const fetchUserData = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            const response = await axios.get(`${API_URL}/api/user/account`, {
+                withCredentials: true,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.data) {
+                setOrders(response.data.orders || []);
+                setWishlist(response.data.wishlist || []);
+            }
+        } catch (error) {
+            console.error('ユーザー情報の取得に失敗:', error);
+        }
+    };
+
+    if (isLoading) {
+        return <div>読み込み中...</div>;
+    }
 
     const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
+            const token = localStorage.getItem('token');
             const formData = new FormData(e.currentTarget);
-            const response = await axios.patch(`${API_URL}/api/user/account`, {
-                name: formData.get('name'),
-                email: formData.get('email')
-            }, {
-                withCredentials: true
-            });
+            const response = await axios.patch(
+                `${API_URL}/api/user/account`,
+                {
+                    name: formData.get('name'),
+                    email: formData.get('email')
+                },
+                {
+                    withCredentials: true,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
 
-            if (response.data) {
-                setUser(response.data.user);
+            if (response.data && response.data.user) {
                 alert('更新が完了しました');
             }
-        } catch {
-            console.error('更新エラーが発生しました。');
+        } catch (error) {
+            console.error('更新エラーが発生しました。', error);
+            alert('更新に失敗しました。');
         }
     };
 

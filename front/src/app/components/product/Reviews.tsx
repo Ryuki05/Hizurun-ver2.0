@@ -1,8 +1,8 @@
+
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, } from 'next/navigation';
 import { M_PLUS_1p } from 'next/font/google';
-import { useSession } from 'next-auth/react';
 
 const mplus1p = M_PLUS_1p({
   subsets: ['latin'],
@@ -38,8 +38,7 @@ interface Product {
 
 const Reviews = () => {
   const { id } = useParams();
-  const router = useRouter();
-  const { status } = useSession();
+//   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
@@ -64,30 +63,19 @@ const Reviews = () => {
     fetchProduct();
   }, [id]);
 
-  const handleViewAllReviews = () => {
-    router.push(`/reviews?productId=${id}`);
-  };
+//   const handleViewAllReviews = () => {
+//     router.push(`/reviews?productId=${id}`);
+//   };
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (status !== 'authenticated') {
-      alert('レビューを投稿するにはログインが必要です');
-      router.push('/sign-up');
-      return;
-    }
 
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('認証トークンがありません');
-      }
-
       const response = await fetch(`http://localhost:8000/api/products/${id}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
         },
         body: JSON.stringify({
@@ -127,12 +115,12 @@ const Reviews = () => {
       <section className={`${mplus1p.className} p-6`}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">レビュー</h2>
-          <button
+          {/* <button
             onClick={handleViewAllReviews}
             className="bg-[#ffb4c1] text-white px-4 py-2 rounded hover:bg-[#fbc2c9]"
           >
             全てのレビューを見る
-          </button>
+          </button> */}
         </div>
 
         {/* レビュー投稿フォーム */}
@@ -192,7 +180,9 @@ const Reviews = () => {
                   ))}
                 </div>
                 <p className="mb-2">{review.comment}</p>
-                <p className="text-sm text-gray-600">投稿者: {review.user.name}</p>
+                <p className="text-sm text-gray-600">
+                    投稿者: {review.user?.name || 'anonymous'}
+                </p>
               </div>
             ))
           ) : (

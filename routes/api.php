@@ -29,7 +29,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/account', [UserController::class, 'show']);
     Route::patch('/user/account', [UserController::class, 'update']);
-    Route::get('/user/wishlist', [UserController::class, 'wishlist'])->name('api.user.wishlist');
+
+
+});
+Route::get('/user/wishlist', [UserController::class, 'wishlist'])->name('api.user.wishlist');
     Route::post('/user/wishlist', [UserController::class, 'addToWishlist'])->name('api.user.wishlist.add');
 
     // カート関連
@@ -38,10 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cart/update', [CartController::class, 'apiUpdate']);
     Route::delete('/cart', [CartController::class, 'apiDestroy']);
 
-    // レビュー関連
-    Route::post('/products/{product}/reviews', [ReviewController::class, 'store'])
-        ->name('api.reviews.store');
-});
+// レビュー関連
+Route::post('/products/{product}/reviews', [ReviewController::class, 'store'])
+->name('api.reviews.store');
 
 // admin
 Route::middleware(['auth:sanctum'])->group(function () {

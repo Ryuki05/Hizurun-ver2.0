@@ -1,13 +1,8 @@
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import { Irish_Grover, M_PLUS_1p } from 'next/font/google';
+import { M_PLUS_1p } from 'next/font/google';
 import Link from 'next/link';
-
-const irishGrover = Irish_Grover({
-    subsets: ['latin'],
-    weight: '400',
-});
 
 const mplus1p = M_PLUS_1p({
     subsets: ['latin'],

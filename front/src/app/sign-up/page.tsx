@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Header from '@/app/components/header/Header';
+import { useAuth } from '@/app/contexts/AuthContext';
 
 // axios.postのURLを環境変数から取得するように修正
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function AuthForm() {
+    const { checkAuth } = useAuth();
     const [formType, setFormType] = useState<'login' | 'register'>('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -26,11 +28,6 @@ export default function AuthForm() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // CSRFトークンを取得
-            await axios.get(`${API_URL}/sanctum/csrf-cookie`, {
-                withCredentials: true
-            });
-
             const response = await axios.post(`${API_URL}/api/login`, {
                 email,
                 password
@@ -40,8 +37,7 @@ export default function AuthForm() {
 
             if (response.data.status === 'success') {
                 localStorage.setItem('token', response.data.token);
-                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-                alert('ログイン成功');
+                await checkAuth();
                 router.push('/user/account');
             }
         } catch (error) {
@@ -54,11 +50,6 @@ export default function AuthForm() {
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            // CSRFトークンを取得
-            await axios.get(`${API_URL}/sanctum/csrf-cookie`, {
-                withCredentials: true
-            });
-
             const response = await axios.post(`${API_URL}/api/sign-up`, {
                 name,
                 email,
@@ -70,8 +61,7 @@ export default function AuthForm() {
 
             if (response.data.status === 'success') {
                 localStorage.setItem('token', response.data.token);
-                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-                alert('登録成功');
+                await checkAuth();
                 router.push('/user/account');
             }
         } catch (error) {

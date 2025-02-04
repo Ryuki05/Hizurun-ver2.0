@@ -1,86 +1,147 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+'use client';
+import React, { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { M_PLUS_1p } from 'next/font/google';
+
+const mplus1p = M_PLUS_1p({
+  subsets: ['latin'],
+  weight: '500',
+});
 
 interface Review {
-  id: number
-  user_name: string
-  rating: number
-  comment: string
-  created_at: string
+  id: number;
+  rating: number;
+  comment: string;
+  user: {
+    name: string;
+  };
+}
+
+interface RelatedProduct {
+  id: number;
+  name: string;
+  price: number;
+  image_path: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  image_path: string;
+  stock: number;
+  reviews: Review[];
+  relatedProducts: RelatedProduct[];
 }
 
 const ReviewsPage = () => {
-  const searchParams = useSearchParams()
-  const productId = searchParams.get('productId')
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [loading, setLoading] = useState(true)
+  const { id } = useParams();
+  const router = useRouter();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // 商品情報の取得
   useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const token = localStorage.getItem('token')
-        const response = await fetch(`http://localhost:8000/api/products/${productId}/reviews`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json'
+    const fetchProduct = async () => {
+      if (id) {
+        try {
+          const response = await fetch(`http://localhost:8000/api/products/${id}`);
+          if (response.ok) {
+            const productData: Product = await response.json();
+            setProduct(productData);
           }
-        })
-        if (!response.ok) {
-          throw new Error('レビューの取得に失敗しました')
+        } catch (error) {
+          console.error('商品情報の取得に失敗しました:', error);
         }
-        const data = await response.json()
-        setReviews(data)
-      } catch (error) {
-        console.error('エラー:', error)
-      } finally {
-        setLoading(false)
       }
-    }
+    };
 
-    if (productId) {
-      fetchReviews()
-    }
-  }, [productId])
+    fetchProduct();
+  }, [id]);
 
-  if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">読み込み中...</div>
+  const handleViewAllReviews = () => {
+    router.push(`/reviews?productId=${id}`);
+  };
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`http://localhost:8000/api/products/${id}/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          rating,
+          comment
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'レビューの投稿に失敗しました');
+      }
+
+      alert('レビューを投稿しました');
+      setComment('');
+      setRating(5);
+
+      // 商品情報を再取得
+      const productResponse = await fetch(`http://localhost:8000/api/products/${id}`);
+      const updatedProduct = await productResponse.json();
+      setProduct(updatedProduct);
+
+    } catch (error) {
+      console.error('レビュー投稿エラー:', error);
+      alert(error instanceof Error ? error.message : 'レビューの投稿に失敗しました');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!product) {
+    return <div>読み込み中...</div>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">商品レビュー</h1>
-        <Link
-          href={`/products/${productId}`}
-          className="bg-[#ffb4c1] text-white px-4 py-2 rounded hover:bg-[#fbc2c9]"
-        >
-          商品ページに戻る
-        </Link>
-      </div>
-      <div className="space-y-6">
-        {reviews.map((review) => (
-          <div key={review.id} className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center justify-between mb-4">
-              <div className="font-semibold">{review.user_name}</div>
-              <div className="text-sm text-gray-500">
-                {new Date(review.created_at).toLocaleDateString('ja-JP')}
-              </div>
-            </div>
-            <div className="flex items-center mb-2">
-              {[...Array(5)].map((_, i) => (
-                <span key={i} className={`text-xl ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}>
-                  ★
-                </span>
-              ))}
-            </div>
-            <p className="text-gray-700">{review.comment}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
+    <div>
 
-export default ReviewsPage
+        {/* レビュー一覧 */}
+        <div className="space-y-4">
+          {product?.reviews?.length > 0 ? (
+            product.reviews.map((review) => (
+              <div key={review.id} className="bg-white p-4 rounded shadow">
+                <div className="flex gap-1 mb-2">
+                  {[...Array(5)].map((_, i) => (
+                    <span
+                      key={i}
+                      className={`text-xl ${
+                        i < review.rating ? 'text-yellow-400' : 'text-gray-300'
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+                <p className="mb-2">{review.comment}</p>
+                <p className="text-sm text-gray-600">
+                    投稿者: {review.user?.name || 'anonymous'}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p>まだレビューがありません。</p>
+          )}
+        </div>
+
+    </div>
+  );
+};
+
+export default ReviewsPage;
