@@ -75,6 +75,25 @@ const Buy = () => {
         checkLoginStatus();
     }, []);
 
+    const addToCart = async (productId: number, quantity: number) => {
+        const response = await fetch('/api/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: quantity,
+            }),
+        });
+
+        if (response.ok) {
+            alert('商品がカートに追加されました');
+        } else {
+            alert('カートへの追加に失敗しました');
+        }
+    };
+
     if (!product) {
         return <div>読み込み中...</div>;
     }
@@ -128,8 +147,6 @@ const Buy = () => {
                     <div className="flex-col m-2">
                         {/* カートに追加のフォーム */}
                         <form action="/cart" method="POST">
-                            <input type="hidden" name="product_id" value={product.id} />
-                            <input type="hidden" name="quantity" value={quantity} />
                             <button
                                 type="submit"
                                 className={`btn2-hizurun-gr w-96 ${mplus1p.className}`}
@@ -137,6 +154,8 @@ const Buy = () => {
                                 カートに追加
                             </button>
                         </form>
+                        {/* ログインしていない場合のメッセージ */}
+                        {/* {!isLoggedIn && <p>ログインしてカートに追加してください。</p>} */}
                     </div>
                     <div className="flex-col m-2">
                         {/* 購入ボタンのフォーム */}

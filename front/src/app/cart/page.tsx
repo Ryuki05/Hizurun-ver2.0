@@ -1,6 +1,9 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Header from '../components/header/Header';
+import Footer from '../components/footer/Footer';
+import '../globals.css';
 
 // カートアイテムの型に image プロパティを追加
 interface CartItem {
@@ -16,18 +19,19 @@ const CartPage = () => {
     const [total, setTotal] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
 
-    useEffect(() => {
-        const fetchCartItems = async () => {
-            const response = await fetch('/api/cart');
-            if (response.ok) {
-                const data = await response.json();
-                setCartItems(data.cartItems);
-                setTotal(data.total);
-            }
-            setLoading(false);
-        };
+    // カートアイテムを取得する関数を定義
+    const fetchCartItems = async () => {
+        const response = await fetch('/api/cart');
+        if (response.ok) {
+            const data = await response.json();
+            setCartItems(data.cartItems);
+            setTotal(data.total);
+        }
+        setLoading(false);
+    };
 
-        fetchCartItems();
+    useEffect(() => {
+        fetchCartItems(); // 初回レンダリング時にカートアイテムを取得
     }, []);
 
     const updateCart = async (productId: number, quantity: number) => {
@@ -45,6 +49,7 @@ const CartPage = () => {
 
         if (response.ok) {
             alert('カートが更新されました');
+            fetchCartItems(); // 更新後にカートアイテムを再取得
         } else {
             alert('カートの更新に失敗しました');
         }
@@ -69,10 +74,31 @@ const CartPage = () => {
         }
     };
 
+    const addToCart = async (productId: number, quantity: number) => {
+        const response = await fetch('/api/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                product_id: productId,
+                quantity: quantity,
+            }),
+        });
+
+        if (response.ok) {
+            alert('商品がカートに追加されました');
+            fetchCartItems(); // カートアイテムを再取得して更新
+        } else {
+            alert('カートへの追加に失敗しました');
+        }
+    };
+
     if (loading) return <div>読み込み中...</div>;
 
     return (
         <div>
+            <Header />
             <h1>カート</h1>
             {cartItems.length > 0 ? (
                 <table>
@@ -90,20 +116,13 @@ const CartPage = () => {
                         {cartItems.map(item => (
                             <tr key={item.product_id}>
                                 <td>
-                                    {/* <Image
-                                        src={item.image}
-                                        alt={item.name}
-                                        width={64}
-                                        height={64}
-                                        className="object-cover"
-                                    /> */}
                                     <Image
-                                    src="/image/Hizurun-ico.png"
-                                    alt="Hizurun Icon"
-                                    width={200}
-                                    height={200}
-                                    style={{ objectFit: "cover" }}
-                                    className="rounded"
+                                        src="/image/Hizurun-ico.png"
+                                        alt="Hizurun Icon"
+                                        width={200}
+                                        height={200}
+                                        style={{ objectFit: "cover" }}
+                                        className="rounded"
                                     />
                                 </td>
                                 <td>{item.name}</td>
@@ -130,6 +149,7 @@ const CartPage = () => {
             <div>
                 合計: ¥{total}
             </div>
+            <Footer />
         </div>
     );
 };

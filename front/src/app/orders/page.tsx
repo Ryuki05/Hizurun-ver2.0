@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../components/header/Header';
 import Footer from '../components/footer/Footer';
-import '../globals.css'
+import '../globals.css';
+
 interface CartItem {
   product: {
     id: number;
@@ -32,19 +33,23 @@ const Orders = () => {
     const fetchOrderSummary = async () => {
       const response = await fetch('http://localhost:8000/api/orders/create', {
         method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
       });
 
       if (response.ok) {
         const data = await response.json();
         setOrderSummary(data);
       } else {
-        console.error('注文内容の取得に失敗しました');
+        const errorText = await response.text(); // HTMLエラーメッセージを取得
+        console.error('注文内容の取得に失敗しました:', errorText);
+        alert('注文内容の取得に失敗しました。詳細: ' + errorText);
       }
     };
 
     fetchOrderSummary();
   }, []);
-
 
   // 注文確定
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,19 +76,28 @@ const Orders = () => {
       })),
     };
 
-    const response = await fetch('http://localhost:8000/api/orders', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(orderData),
-    });
+    try {
+      const response = await fetch('http://localhost:8000/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(orderData),
+      });
 
-    if (response.ok) {
+      if (response.ok) {
         alert('注文を確定しました');
         router.push('/');
-    } else {
-      console.error('注文確定に失敗しました');
+      } else {
+        const errorData = await response.json(); // JSONでエラーメッセージを取得
+        console.error('注文確定に失敗しました:', errorData);
+        alert('注文確定に失敗しました: ' + errorData.message);
+      }
+    } catch (error) {
+      console.error('ネットワークエラー:', error);
+      const errorMessage = (error as Error).message;
+      alert('ネットワークエラーが発生しました。再試行してください。詳細: ' + errorMessage);
     }
   };
 
@@ -95,13 +109,7 @@ const Orders = () => {
     <div className=" min-h-screen">
       <Header />
       <div className="max-w-3xl mt-3 mx-auto px-4 py-10 hizurun-border">
-
         <form onSubmit={handleSubmit} className="hizurun-border-inner bg-white p-8 rounded-lg shadow-lg">
-            <div className="text-center">
-                <button type="submit" className="btn-hizurun-gr">
-                注文を確定する
-                </button>
-            </div>
           <div className="mb-6">
             <h2 className="text-2xl font-semibold text-gray-700 mb-4">配送情報</h2>
             <div className="space-y-4">
@@ -200,7 +208,11 @@ const Orders = () => {
             </table>
           </div>
 
-
+          <div className="text-center">
+            <button type="submit" className="btn-hizurun-gr">
+              注文を確定する
+            </button>
+          </div>
         </form>
       </div>
       <Footer />

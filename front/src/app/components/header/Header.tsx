@@ -109,7 +109,7 @@ const Header = () => {
                     <Link className='text-hizurun-gr' href={`../../user/account`}>アカウント情報</Link>
                 </li>
                 <li className='bg-white rounded-lg p-1 mr-3'>
-                    <Link className='text-hizurun-gr' href={`#`}>注文履歴</Link>
+                    <Link className='text-hizurun-gr' href={`/history`}>注文履歴</Link>
                 </li>
                 <li className='bg-white rounded-lg p-1 mr-3'>
                     <Link className='text-hizurun-gr' href={`../../cart`}>カート</Link>
